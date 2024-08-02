@@ -50,8 +50,9 @@ const updateCoins = () => {
   coins[1].price += Math.round(Math.random() * 10 - 5);
   // Price always grows forever by 1
   coins[2].price += 1;
-  // Price surges to 200 but crashes immediately back to 100
-  coins[3].price += coins[3].price < 200 ? 10 : -100;
+  // Increment CoinB price by 1
+  coins[3].price += 1;
+  console.log(`Updated CoinB price: ${coins[3].price}`); // Logging for CoinB price update
   // Price changes based on how many of this coin you currently own
   // If you own an even number then the price doubles, if odd, the price halves
   coins[4].price = Math.round(
@@ -123,6 +124,7 @@ const server = app.listen(port, () => {
 const wss = new WebSocket.Server({ noServer: true });
 
 wss.on("connection", (ws: WebSocket) => {
+  console.log("WebSocket connection established");
   resetData();
 
   // Send initial coin prices to the client
@@ -131,10 +133,12 @@ wss.on("connection", (ws: WebSocket) => {
   // Simulate price updates every 5 seconds
   const priceUpdateInterval = setInterval(() => {
     updateCoins();
+    console.log("Sending updated coin data");
     ws.send(getAllData());
   }, 5000);
 
   ws.on("close", () => {
+    console.log("WebSocket connection closed");
     clearInterval(priceUpdateInterval);
   });
 });
@@ -144,3 +148,5 @@ server.on("upgrade", (request, socket, head) => {
     wss.emit("connection", ws, request);
   });
 });
+
+export { server };
